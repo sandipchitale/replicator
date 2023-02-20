@@ -1,6 +1,6 @@
 {
   "name": "replicator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wrap any command in REPL",
   "main": "dist/index.js",
   "bin": "dist/index.js",
