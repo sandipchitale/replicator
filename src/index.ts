@@ -4,10 +4,11 @@ import * as child_process from 'child_process';
 
     if (process.argv.length !== 3) {
         console.error('Usage: replicator commandToWrap');
+        console.error('       commandToWrap can use _ in place of spaces and will be replaced with spaces');
         process.exit(1);
     }
 
-    const commandToWrap = process.argv[2];
+    const commandToWrap = process.argv[2].replace(/_/g, ' ');
     console.log(commandToWrap);
 
     const commandPrompt = readline.createInterface({
@@ -33,19 +34,26 @@ import * as child_process from 'child_process';
             });
             commandPrompt.prompt();
             return;
-        } else if (command.match(/^!\d+.*$/)) {
-            const matches = command.match(/^!(\d+)(.*)$/);
+        } else if (command.match(/^!(\d+|!).*$/)) {
+            const matches = command.match(/^!(\d+|!)(.*)$/);
             command = undefined;
             if (matches && matches.length >= 2) {
                 try {
-                    const commandNumber = parseInt(matches[1]);
-                    let historyCommand = history.find(historyItem => historyItem.startsWith(`${commandNumber} >`));
+                    let historyCommand;
+                    let localCommandNumber;
+                    if (matches[1] === '!') {
+                        localCommandNumber = history.length;
+                        historyCommand = history[localCommandNumber - 1];
+                    } else {
+                        localCommandNumber = parseInt(matches[1]);
+                        historyCommand = history.find(historyItem => historyItem.startsWith(`${localCommandNumber} >`));
+                    }
                     if (matches.length === 3) {
                         historyCommand += `${matches[2]}`;
                     }
                     if (historyCommand) {
                         console.log(`${historyCommand}\n`);
-                        command = historyCommand.replace(`${commandNumber} > ${commandToWrap} `, '');
+                        command = historyCommand.replace(`${localCommandNumber} > ${commandToWrap} `, '');
                     }
                 } catch (error: any) {
                 }
